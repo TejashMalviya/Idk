@@ -1,92 +1,346 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Interactive Creative Website</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Interactive Parallax + 3D Site — Tejash</title>
+
+  <!-- Tailwind (CDN quick) -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+
+  <!-- Tiny Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --accent: #8b5cf6;
+      --bg-1: radial-gradient(circle at 10% 10%, rgba(139,92,246,0.18), transparent 8%),
+             radial-gradient(circle at 90% 90%, rgba(59,130,246,0.08), transparent 12%);
+    }
+    body{ font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    /* full-screen parallax container */
+    .parallax-scene{
+      perspective: 1200px;
+      height: 80vh;
+      min-height: 520px;
+      position: relative;
+      overflow: hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    /* parallax layers */
+    .layer{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform-style: preserve-3d;
+      transform-origin:center;
+      will-change: transform, opacity;
+    }
+
+    /* decorative blobs */
+    .blob{
+      filter: blur(36px);
+      opacity: 0.75;
+      mix-blend-mode: screen;
+    }
+
+    /* hero content */
+    .hero-card{
+      backdrop-filter: blur(6px) saturate(120%);
+      background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 10px 40px rgba(2,6,23,0.6);
+      border-radius: 18px;
+      padding: 2.25rem;
+      width: min(880px, 92%);
+      z-index: 40;
+      transform-style: preserve-3d;
+    }
+
+    /* projects 3d card */
+    .project-card{
+      transform-style: preserve-3d;
+      transition: transform .18s ease, box-shadow .18s ease;
+      will-change: transform;
+      perspective: 1000px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.04);
+      padding:1.25rem;
+      border-radius: 14px;
+    }
+
+    /* reveal util */
+    .reveal{
+      opacity:0;
+      transform: translateY(18px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal.visible{
+      opacity:1;
+      transform:none;
+    }
+
+    /* prefers-reduced-motion fallback */
+    @media (prefers-reduced-motion: reduce){
+      .layer, .project-card, .hero-card { transition: none !important; animation: none !important; }
+    }
+
+    /* subtle gradient background */
+    .page-bg{
+      background-image: var(--bg-1);
+      background-color: #0b1020;
+      background-attachment: fixed;
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white font-sans">
+<body class="page-bg text-slate-200 antialiased">
 
-  <!-- Navbar -->
-  <nav class="flex justify-between items-center px-6 py-4 bg-black bg-opacity-50 backdrop-blur-sm fixed w-full top-0 z-50">
-    <h1 class="text-2xl font-bold tracking-wide">✨ MySite</h1>
-    <ul class="hidden md:flex space-x-6">
-      <li><a href="#home" class="hover:text-purple-400 transition">Home</a></li>
-      <li><a href="#about" class="hover:text-purple-400 transition">About</a></li>
-      <li><a href="#projects" class="hover:text-purple-400 transition">Projects</a></li>
-      <li><a href="#contact" class="hover:text-purple-400 transition">Contact</a></li>
-    </ul>
-  </nav>
-
-  <!-- Hero Section -->
-  <section id="home" class="h-screen flex flex-col justify-center items-center text-center px-4">
-    <h2 class="text-4xl md:text-6xl font-bold mb-4">
-      Hi, I'm <span class="text-purple-400">Tejash</span> 👋
-    </h2>
-    <h3 class="text-xl md:text-2xl text-gray-300 mb-6">
-      <span id="typed"></span>
-    </h3>
-    <button class="px-6 py-3 bg-purple-500 rounded-full hover:bg-purple-700 transition transform hover:scale-105">
-      Explore More
-    </button>
-  </section>
-
-  <!-- About Section -->
-  <section id="about" class="py-20 px-6 md:px-20">
-    <h2 class="text-3xl font-bold mb-6 text-center">About Me</h2>
-    <p class="max-w-3xl mx-auto text-gray-300 text-center leading-relaxed">
-      I’m a creative web developer who loves building interactive and aesthetic websites.
-      My mission is to bring imagination to life through code, blending design and functionality
-      for an unforgettable user experience.
-    </p>
-  </section>
-
-  <!-- Projects Section -->
-  <section id="projects" class="py-20 bg-gray-800 px-6 md:px-20">
-    <h2 class="text-3xl font-bold mb-10 text-center">My Projects</h2>
-    <div class="grid md:grid-cols-3 gap-8">
-      <div class="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 transition transform">
-        <h3 class="text-xl font-semibold mb-4">🚀 Project One</h3>
-        <p class="text-gray-400">An interactive web app with smooth animations and stunning UI.</p>
+  <!-- NAV -->
+  <nav class="fixed z-50 w-full top-4 px-6 md:px-12">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="text-white/90 font-extrabold text-lg">Tejash <span class="text-purple-400">•</span></div>
+      <div class="hidden md:flex gap-6 text-sm text-slate-300">
+        <a href="#home" class="hover:text-white">Home</a>
+        <a href="#projects" class="hover:text-white">Projects</a>
+        <a href="#about" class="hover:text-white">About</a>
+        <a href="#contact" class="hover:text-white">Contact</a>
       </div>
-      <div class="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 transition transform">
-        <h3 class="text-xl font-semibold mb-4">🎨 Project Two</h3>
-        <p class="text-gray-400">A creative portfolio showcasing art and code together.</p>
-      </div>
-      <div class="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 transition transform">
-        <h3 class="text-xl font-semibold mb-4">⚡ Project Three</h3>
-        <p class="text-gray-400">A high-performance website with optimized loading speed.</p>
+
+      <!-- mobile menu -->
+      <div class="md:hidden">
+        <button id="mobileToggle" class="p-2 rounded bg-white/5">☰</button>
       </div>
     </div>
-  </section>
+  </nav>
 
-  <!-- Contact Section -->
-  <section id="contact" class="py-20 px-6 md:px-20 text-center">
-    <h2 class="text-3xl font-bold mb-6">Contact Me</h2>
-    <form class="max-w-lg mx-auto space-y-4">
-      <input type="text" placeholder="Your Name" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
-      <input type="email" placeholder="Your Email" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
-      <textarea placeholder="Your Message" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
-      <button type="submit" class="w-full py-3 bg-purple-500 rounded-lg hover:bg-purple-700 transition">Send Message</button>
-    </form>
-  </section>
+  <!-- HERO / PARALLAX SCENE -->
+  <header id="home" class="parallax-scene mt-16 md:mt-8">
+    <!-- background layered blobs -->
+    <div class="layer blob w-[700px] h-[420px] -translate-x-1/2 -translate-y-1/2" style="background: linear-gradient(135deg,#8b5cf6,#06b6d4); left:30%; top:30%; opacity:.45;"></div>
+    <div class="layer blob w-[520px] h-[340px] -translate-x-1/2 -translate-y-1/2" style="background: linear-gradient(135deg,#f97316,#ef4444); left:70%; top:40%; opacity:.25;"></div>
+    <div class="layer" style="transform: translate(-50%,-50%) translateZ(120px) scale(.95); z-index:20;">
+      <div class="hero-card text-center">
+        <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white">
+          Hi — I’m <span style="color:var(--accent)">Tejash</span>
+        </h1>
+        <p class="mt-3 text-slate-300 max-w-2xl mx-auto">
+          I build interactive websites — <span id="typedShort" class="text-sm md:text-base text-slate-100/85"></span>
+        </p>
 
-  <!-- Footer -->
-  <footer class="py-6 bg-black text-center text-gray-500 text-sm">
-    &copy; 2025 MySite. All rights reserved.
+        <div class="mt-6 flex justify-center gap-3">
+          <a href="#projects" class="px-5 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg hover:scale-[1.02] transition">Explore Projects</a>
+          <button id="themeBtn" class="px-4 py-2 rounded-full border border-white/6 text-white/90">Night Vibe</button>
+        </div>
+
+        <!-- small interactive hint -->
+        <div class="mt-6 text-xs text-slate-400">Move your mouse — try tilting the cards below 👇</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Decorative separator -->
+  <div class="w-full -mt-6">
+    <svg viewBox="0 0 1200 60" class="w-full" preserveAspectRatio="none">
+      <path d="M0 0 C 300 80 900 -40 1200 40 L1200 60 L0 60 Z" fill="#061026" opacity="0.9"></path>
+    </svg>
+  </div>
+
+  <!-- PROJECTS -->
+  <main class="max-w-7xl mx-auto px-6 md:px-12 pb-24">
+    <section id="projects" class="mt-8">
+      <h2 class="text-2xl md:text-3xl font-bold text-white">Projects — Interactive & 3D</h2>
+      <p class="text-slate-400 mt-2 max-w-2xl">Hover and move the mouse across the cards to see the 3D tilt + parallax effect. Scroll to reveal.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <!-- card 1 -->
+        <article class="reveal project-card" data-depth="20">
+          <div class="transform-gpu">
+            <div class="text-sm text-indigo-300 font-semibold">Web App</div>
+            <h3 class="text-lg font-bold mt-2">Aurora Dashboard</h3>
+            <p class="text-slate-300 mt-3 text-sm">Real-time analytics with fluid micro-interactions and charts.</p>
+            <div class="mt-4 flex gap-2">
+              <span class="px-3 py-1 rounded-full text-xs bg-white/4">React</span>
+              <span class="px-3 py-1 rounded-full text-xs bg-white/4">Tailwind</span>
+            </div>
+            <div class="mt-6 flex gap-3">
+              <button class="px-3 py-2 rounded-md bg-gradient-to-r from-purple-500 to-violet-400 text-white">Live</button>
+              <button class="px-3 py-2 rounded-md border border-white/6 text-white/90">Code</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- card 2 -->
+        <article class="reveal project-card" data-depth="28">
+          <div>
+            <div class="text-sm text-pink-300 font-semibold">Visual</div>
+            <h3 class="text-lg font-bold mt-2">Canvas Painter</h3>
+            <p class="text-slate-300 mt-3 text-sm">Interactive particle painting with responsive touch controls.</p>
+            <div class="mt-4 flex gap-2">
+              <span class="px-3 py-1 rounded-full text-xs bg-white/4">Canvas</span>
+              <span class="px-3 py-1 rounded-full text-xs bg-white/4">JS</span>
+            </div>
+            <div class="mt-6 flex gap-3">
+              <button class="px-3 py-2 rounded-md bg-gradient-to-r from-pink-500 to-rose-400 text-white">Try</button>
+              <button class="px-3 py-2 rounded-md border border-white/6 text-white/90">Source</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- card 3 -->
+        <article class="reveal project-card" data-depth="36">
+          <div>
+            <div class="text-sm text-emerald-300 font-semibold">Motion</div>
+            <h3 class="text-lg font-bold mt-2">Motion Lab</h3>
+            <p class="text-slate-300 mt-3 text-sm">Prototype micro-interactions & design tokens for teams.</p>
+            <div class="mt-4 flex gap-2">
+              <span class="px-3 py-1 rounded-full text-xs bg-white/4">Design</span>
+              <span class="px-3 py-1 rounded-full text-xs bg-white/4">Prototype</span>
+            </div>
+            <div class="mt-6 flex gap-3">
+              <button class="px-3 py-2 rounded-md bg-gradient-to-r from-emerald-500 to-teal-400 text-white">Open</button>
+              <button class="px-3 py-2 rounded-md border border-white/6 text-white/90">Docs</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="mt-20">
+      <h2 class="text-2xl font-bold">About me</h2>
+      <div class="mt-4 grid md:grid-cols-2 gap-8">
+        <p class="text-slate-300 reveal">I'm Tejash — a student and creative web developer. I like building interactive UIs, learning full-stack, and experimenting with motion & UX.</p>
+        <div class="reveal">
+          <ul class="text-slate-300 space-y-2">
+            <li>📚 Learning: Full-stack Java, DevOps, DSA</li>
+            <li>⚙️ Tools: Tailwind, JS, Canvas, React (for some projects)</li>
+            <li>🎯 Goal: Build accessible, high-performance web experiences</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="mt-20 pb-12">
+      <h2 class="text-2xl font-bold">Contact</h2>
+      <form class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 reveal">
+        <input class="p-3 rounded-md bg-white/5 border border-white/6" placeholder="Your name" />
+        <input class="p-3 rounded-md bg-white/5 border border-white/6" placeholder="Your email" />
+        <textarea class="p-3 rounded-md bg-white/5 border border-white/6 md:col-span-2" rows="4" placeholder="Message"></textarea>
+        <button class="md:col-span-2 px-4 py-3 rounded-md bg-gradient-to-r from-purple-600 to-pink-500 text-white">Send</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="text-center py-8 text-sm text-slate-400">
+    © <span id="year"></span> Tejash • Built with ❤️ and Tailwind
   </footer>
 
-  <!-- JavaScript for Typing Effect -->
+  <!-- SCRIPTS: typed text, parallax, reveal, tilt -->
   <script>
-    var typed = new Typed('#typed', {
-      strings: ["A Web Developer", "A Creative Designer", "An Innovator"],
-      typeSpeed: 70,
-      backSpeed: 50,
-      loop: true
+    // small typed-like loop for hero with no external libs
+    (function typed(){
+      const el = document.getElementById('typedShort');
+      const items = ['interactive experiences','3D micro-interactions','motion-driven UI'];
+      let i=0, j=0, forward=true;
+      if(!el) return;
+      function step(){
+        const word = items[i];
+        el.textContent = word.slice(0,j);
+        if(forward){
+          j++;
+          if(j>word.length){ forward=false; setTimeout(step,900); return; }
+        }else{
+          j--;
+          if(j<0){ forward=true; i=(i+1)%items.length; setTimeout(step,200); return; }
+        }
+        setTimeout(step,60);
+      } step();
+    })();
+
+    // set year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Scroll-parallax + mouse-parallax for layers and project cards
+    (function(){
+      const scene = document.querySelector('.parallax-scene');
+      const layers = Array.from(document.querySelectorAll('.parallax-scene .layer'));
+      const cards = Array.from(document.querySelectorAll('.project-card'));
+      let w = window.innerWidth, h = window.innerHeight;
+      window.addEventListener('resize', () => { w = innerWidth; h = innerHeight; });
+
+      // mouse move parallax for entire scene
+      window.addEventListener('mousemove', (e) => {
+        const cx = w/2, cy = h/2;
+        const dx = (e.clientX - cx) / cx;
+        const dy = (e.clientY - cy) / cy;
+        // layers: translateZ based on index
+        layers.forEach((L, idx) => {
+          const depth = (idx+1) * 8; // increase for stronger depth
+          const tx = dx * depth * 6;
+          const ty = dy * depth * 6 * -1;
+          L.style.transform = `translate(-50%,-50%) translate3d(${tx}px, ${ty}px, ${depth * 4}px)`;
+        });
+      });
+
+      // scroll-driven parallax: move each layer vertically slower/faster
+      function onScroll(){
+        const sc = window.scrollY;
+        layers.forEach((L, idx) => {
+          const speed = (idx+1) * 0.08;
+          const baseZ = (idx+1) * 30;
+          const y = -sc * speed;
+          L.style.transform = L.style.transform.replace(/translate3d\(.+?\)/, `translate3d(0px, ${y}px, ${baseZ}px)`) ;
+        });
+      }
+      window.addEventListener('scroll', onScroll, {passive:true});
+
+      // 3D tilt for project cards
+      cards.forEach(card => {
+        const depth = +card.dataset.depth || 20;
+        let rect = null;
+        card.addEventListener('pointermove', (ev) =>{
+          if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+          rect = rect || card.getBoundingClientRect();
+          const px = (ev.clientX - rect.left) / rect.width;
+          const py = (ev.clientY - rect.top) / rect.height;
+          const rotateY = (px - 0.5) * depth;
+          const rotateX = (0.5 - py) * depth;
+          const translateZ = 18;
+          card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(1.02)`;
+          card.style.boxShadow = `${-(rotateY*2)}px ${Math.abs(rotateX)*1.8}px 30px rgba(2,6,23,0.6)`;
+        });
+        card.addEventListener('pointerleave', () =>{
+          card.style.transform = '';
+          card.style.boxShadow = '';
+        });
+      });
+
+      // reveal on scroll for .reveal elements
+      const reveals = Array.from(document.querySelectorAll('.reveal'));
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(e=>{
+          if(e.isIntersecting) e.target.classList.add('visible');
+        });
+      }, {threshold: 0.12});
+      reveals.forEach(r => revealObserver.observe(r));
+    })();
+
+    // small mobile menu toggle
+    document.getElementById('mobileToggle').addEventListener('click', ()=>{
+      alert('Mobile menu placeholder — you can wire a drawer here. (Will implement if you want!)');
+    });
+
+    // theme toggler (toy)
+    document.getElementById('themeBtn').addEventListener('click', (e)=>{
+      document.body.classList.toggle('bg-white');
+      document.body.classList.toggle('text-slate-900');
+      e.target.textContent = document.body.classList.contains('bg-white') ? 'Day Vibe' : 'Night Vibe';
     });
   </script>
-
 </body>
 </html>
